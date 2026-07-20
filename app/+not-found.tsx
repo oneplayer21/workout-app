@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
       <View style={styles.container}>
         <Text style={styles.text}>This screen doesn't exist.</Text>
         <Link href="/" style={styles.link}>
-          <Text>Go to home screen!</Text>
+          <Text style={{ color: '#812dcf' }}>Go to home screen!</Text>
         </Link>
       </View>
     </>
@@ -21,10 +21,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    backgroundColor: '#262626',
   },
   text: {
     fontSize: 20,
     fontWeight: 600,
+    color: '#ffffff',
   },
   link: {
     marginTop: 15,

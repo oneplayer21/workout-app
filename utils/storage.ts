@@ -18,7 +18,7 @@ export interface ExerciseLog {
   exerciseName: string;
   sets: {
     reps: number;
-    weight: number;
+    weight: string;
   }[];
 }
 
@@ -32,6 +32,7 @@ export interface WorkoutSession {
 
 const PRESETS_KEY = '@workout_presets';
 const SESSIONS_KEY = '@workout_sessions';
+const normalizeExerciseName = (n: string) => n.trim().toLowerCase();
 
 export const storage = {
   async getPresets(): Promise<WorkoutPreset[]> {
@@ -71,7 +72,20 @@ export const storage = {
   async getSessions(): Promise<WorkoutSession[]> {
     try {
       const data = await AsyncStorage.getItem(SESSIONS_KEY);
-      return data ? JSON.parse(data) : [];
+      if (!data) return [];
+      const parsed: WorkoutSession[] = JSON.parse(data);
+      return parsed.map((session) => ({
+        ...session,
+        exercises: session.exercises.map((ex) => ({
+          ...ex,
+            sets: ex.sets.map((s) => ({
+              reps: s.reps,
+              weight: typeof (s as any).weight === 'number'
+                ? String((s as any).weight)
+                : (s as any).weight ?? '',
+            })),
+          })),
+      }));
     } catch (error) {
       console.error('Error loading sessions:', error);
       return [];
@@ -91,6 +105,22 @@ export const storage = {
     await this.saveSessions([session, ...sessions]);
   },
 
+  async deleteSession(id: string): Promise<void> {
+    const sessions = await this.getSessions();
+    await this.saveSessions(sessions.filter((s) => s.id !== id));
+  },
+
+  async updateSession(session: WorkoutSession): Promise<void> {
+    const sessions = await this.getSessions();
+    const updated = sessions.map((s) => (s.id === session.id ? session : s));
+    await this.saveSessions(updated);
+  },
+
+  async getSessionById(id: string): Promise<WorkoutSession | undefined> {
+    const sessions = await this.getSessions();
+    return sessions.find((s) => s.id === id);
+  },
+
   async getLastPerformance(
     exerciseId: string
   ): Promise<ExerciseLog | undefined> {
@@ -104,5 +134,56 @@ export const storage = {
       }
     }
     return undefined;
+  },
+
+  async getLastPerformanceByName(
+    exerciseName: string
+  ): Promise<ExerciseLog | undefined> {
+    const target = normalizeExerciseName(exerciseName);
+    const sessions = await this.getSessions();
+    for (const session of sessions) {
+      for (const ex of session.exercises) {
+        if (normalizeExerciseName(ex.exerciseName) === target) {
+          return ex; // first found = most recent (sessions list is newest first)
+        }
+      }
+    }
+    return undefined;
+  },
+
+  async getAllExerciseNames(): Promise<string[]> {
+    const sessions = await this.getSessions();
+    const names = new Set<string>();
+    sessions.forEach((s) => {
+      s.exercises.forEach((e) => {
+        names.add(e.exerciseName);
+      });
+    });
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  },
+
+  async getHistoryForExercise(
+    name: string
+  ): Promise<{ date: string; sets: { reps: number; weight: string }[] }[]> {
+    const sessions = await this.getSessions();
+    const target = normalizeExerciseName(name);
+    const history: {
+      date: string;
+      sets: { reps: number; weight: string }[];
+    }[] = [];
+
+    sessions.forEach((s) => {
+      const ex = s.exercises.find(
+        (e) => normalizeExerciseName(e.exerciseName) === target
+      );
+      if (ex) {
+        history.push({
+          date: s.date,
+          sets: ex.sets,
+        });
+      }
+    });
+
+    return history;
   },
 };

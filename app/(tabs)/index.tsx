@@ -107,7 +107,7 @@ export default function WorkoutsScreen() {
           <TouchableOpacity
             onPress={() => openEditModal(item)}
             style={styles.iconButton}>
-            <Edit2 size={20} color="#2563eb" />
+            <Edit2 size={20} color="#812dcf" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleDeletePreset(item.id)}
@@ -130,7 +130,7 @@ export default function WorkoutsScreen() {
         <TouchableOpacity
           style={[styles.button, styles.startButton]}
           onPress={() => startWorkout(item)}>
-          <Play size={16} color="#fff" />
+          <Play size={16} color="#141414" />
           <Text style={styles.startButtonText}>Commencer</Text>
         </TouchableOpacity>
       </View>
@@ -144,7 +144,7 @@ export default function WorkoutsScreen() {
         <TouchableOpacity
           style={styles.addButton}
           onPress={openCreateModal}>
-          <Plus size={24} color="#fff" />
+          <Plus size={24} color="#141414" />
         </TouchableOpacity>
       </View>
 
@@ -205,7 +205,7 @@ export default function WorkoutsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#262626',
   },
   header: {
     flexDirection: 'row',
@@ -213,16 +213,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 60,
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
+    color: '#ffffff',
   },
   addButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#812dcf',
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   presetCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -253,6 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     flex: 1,
+    color: '#ffffff',
   },
   presetActions: {
     flexDirection: 'row',
@@ -280,18 +282,18 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   editExercisesButton: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#262626',
   },
   editExercisesButtonText: {
-    color: '#374151',
+    color: '#fff',
     fontWeight: '600',
     fontSize: 14,
   },
   startButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#812dcf',
   },
   startButtonText: {
-    color: '#fff',
+    color: '#141414',
     fontWeight: '600',
     fontSize: 14,
   },
@@ -319,7 +321,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -329,6 +331,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 16,
+    color: '#ffffff',
   },
   input: {
     borderWidth: 1,
@@ -357,10 +360,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#812dcf',
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#141414',
     fontWeight: '600',
     fontSize: 16,
   },

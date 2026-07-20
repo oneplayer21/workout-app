@@ -9,7 +9,7 @@ import {
   Modal,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react-native';
 import { storage, WorkoutPreset, Exercise } from '@/utils/storage';
 
 export default function EditExercisesScreen() {
@@ -55,6 +55,24 @@ export default function EditExercisesScreen() {
     setExerciseNotes('');
   };
 
+  const moveExercise = async (index: number, direction: 'up' | 'down') => {
+    if (!preset) return;
+    const newExercises = [...preset.exercises];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (targetIndex < 0 || targetIndex >= newExercises.length) return;
+
+    // Swap
+    [newExercises[index], newExercises[targetIndex]] = [
+      newExercises[targetIndex],
+      newExercises[index],
+    ];
+
+    const updatedPreset = { ...preset, exercises: newExercises };
+    await storage.updatePreset(updatedPreset);
+    setPreset(updatedPreset);
+  };
+
   const handleDeleteExercise = async (exerciseId: string) => {
     if (!preset) return;
 
@@ -67,17 +85,34 @@ export default function EditExercisesScreen() {
     setPreset(updatedPreset);
   };
 
-  const renderExercise = ({ item }: { item: Exercise }) => (
+  const renderExercise = ({ item, index }: { item: Exercise; index: number }) => (
     <View style={styles.exerciseCard}>
       <View style={styles.exerciseInfo}>
         <Text style={styles.exerciseName}>{item.name}</Text>
         {item.notes && <Text style={styles.exerciseNotes}>{item.notes}</Text>}
       </View>
-      <TouchableOpacity
-        onPress={() => handleDeleteExercise(item.id)}
-        style={styles.deleteButton}>
-        <Trash2 size={20} color="#dc2626" />
-      </TouchableOpacity>
+      
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <TouchableOpacity
+          onPress={() => moveExercise(index, 'up')}
+          disabled={index === 0}
+          style={{ padding: 4, opacity: index === 0 ? 0.3 : 1 }}>
+          <ChevronUp size={20} color="#fff" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          onPress={() => moveExercise(index, 'down')}
+          disabled={!preset || index === preset.exercises.length - 1}
+          style={{ padding: 4, opacity: (!preset || index === preset.exercises.length - 1) ? 0.3 : 1 }}>
+          <ChevronDown size={20} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => handleDeleteExercise(item.id)}
+          style={[styles.deleteButton, { marginLeft: 8, borderLeftWidth: 1, borderLeftColor: '#374151', paddingLeft: 8 }]}>
+          <Trash2 size={20} color="#dc2626" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -93,13 +128,13 @@ export default function EditExercisesScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <ArrowLeft size={24} color="#000" />
+          <ArrowLeft size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.title}>{preset.name}</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => setModalVisible(true)}>
-          <Plus size={24} color="#fff" />
+          <Plus size={24} color="#141414" />
         </TouchableOpacity>
       </View>
 
@@ -130,6 +165,7 @@ export default function EditExercisesScreen() {
             <TextInput
               style={styles.input}
               placeholder="Nom de l'exercice"
+              placeholderTextColor="#9ca3af"
               value={exerciseName}
               onChangeText={setExerciseName}
               autoFocus
@@ -137,6 +173,7 @@ export default function EditExercisesScreen() {
             <TextInput
               style={[styles.input, styles.textArea]}
               placeholder="Notes (optionnel)"
+              placeholderTextColor="#9ca3af"
               value={exerciseNotes}
               onChangeText={setExerciseNotes}
               multiline
@@ -168,7 +205,7 @@ export default function EditExercisesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f3f4f6',
+    backgroundColor: '#262626',
   },
   header: {
     flexDirection: 'row',
@@ -176,9 +213,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingTop: 60,
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: '#262626',
   },
   backButton: {
     padding: 4,
@@ -189,9 +226,10 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     marginHorizontal: 12,
+    color: '#ffffff',
   },
   addButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#812dcf',
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -202,7 +240,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   exerciseCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -222,10 +260,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
+    color: '#ffffff',
   },
   exerciseNotes: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9ca3af',
   },
   deleteButton: {
     padding: 4,
@@ -239,12 +278,12 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#374151',
+    color: '#d1d5db',
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#6b7280',
+    color: '#9ca3af',
     textAlign: 'center',
   },
   modalOverlay: {
@@ -254,7 +293,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#141414',
     borderRadius: 16,
     padding: 24,
     width: '85%',
@@ -264,14 +303,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     marginBottom: 16,
+    color: '#ffffff',
   },
   input: {
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#374151',
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 12,
+    backgroundColor: '#262626',
+    color: '#ffffff',
   },
   textArea: {
     height: 80,
@@ -297,10 +339,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: '#812dcf',
   },
   saveButtonText: {
-    color: '#fff',
+    color: '#141414',
     fontWeight: '600',
     fontSize: 16,
   },

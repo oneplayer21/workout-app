@@ -1,13 +1,14 @@
 import { Tabs } from 'expo-router';
-import { Dumbbell, History } from 'lucide-react-native';
+import { Dumbbell, History, List } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#6b7280',
+        tabBarActiveTintColor: '#812dcf',
+        tabBarInactiveTintColor: '#9ca3af',
+        tabBarStyle: { backgroundColor: '#141414', borderTopColor: '#262626' },
       }}>
       <Tabs.Screen
         name="index"
@@ -15,6 +16,15 @@ export default function TabLayout() {
           title: 'Entraînements',
           tabBarIcon: ({ size, color }) => (
             <Dumbbell size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="exercises"
+        options={{
+          title: 'Exercices',
+          tabBarIcon: ({ size, color }) => (
+            <List size={size} color={color} />
           ),
         }}
       />
