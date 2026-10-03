@@ -42,7 +42,7 @@ jobs:
           }
 
           BUILD_DIR="$PWD/build/Release-iphoneos"
-          rm -rf "$PWD/build"
+          rm -rf "$BUILD_DIR" "$PWD/build/DerivedData"
           mkdir -p "$BUILD_DIR"
 
           xcodebuild \
