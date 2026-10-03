@@ -1,13 +1,23 @@
 {
-  "cli": { "version": ">= 11.0.0" },
+  "cli": {
+    "version": ">= 11.0.0"
+  },
   "build": {
     "preview": {
-      "android": { "buildType": "apk" },
-      "ios": { "enterpriseProvisioning": "universal" }
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "enterpriseProvisioning": "universal"
+      }
     },
     "production": {
-      "android": { "gradleCommand": ":app:bundleRelease" },
-      "ios": { "distribution": "store" }
+      "android": {
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "ios": {
+        "distribution": "store"
+      }
     }
   },
   "submit": {
