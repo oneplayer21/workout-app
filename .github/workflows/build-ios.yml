@@ -23,8 +23,8 @@ jobs:
       - name: Build unsigned IPA
         run: |
           cd ios
-          # Find the workspace file
-          WORKSPACE=$(ls -1 *.xcworkspace | head -n 1)
+          # Use -d to prevent ls from listing the contents of the workspace directory
+          WORKSPACE=$(ls -1d *.xcworkspace | head -n 1)
           
           # Automatically detect the correct scheme from the workspace
           SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/{getline; print $1}')
