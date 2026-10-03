@@ -20,14 +20,18 @@ jobs:
 
       - name: Expo Prebuild
         run: npx expo prebuild --platform ios
-
       - name: Build unsigned IPA
         run: |
           cd ios
-          # Compile the app without code signing
-          xcodebuild -workspace *.xcworkspace -scheme $(ls -1 *.xcworkspace | sed 's/\.xcworkspace//') -configuration Release -sdk iphoneos CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" SYMROOT=$(PWD)/build build
-
-          # Package the compiled .app into an .ipa file
+          # Find the workspace file
+          WORKSPACE=$(ls -1 *.xcworkspace | head -n 1)
+          
+          # Automatically detect the correct scheme from the workspace
+          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/{getline; print $1}')
+          
+          # Build using the detected workspace and scheme
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" SYMROOT=$(PWD)/build build
+          
           cd build/Release-iphoneos
           mkdir Payload
           mv *.app Payload/
