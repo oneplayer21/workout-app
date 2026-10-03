@@ -21,22 +21,55 @@ jobs:
       - name: Expo Prebuild
         run: npx expo prebuild --platform ios
       - name: Build unsigned IPA
+        shell: bash
         run: |
-          cd ios
-          # Use -d to prevent ls from listing the contents of the workspace directory
-          WORKSPACE=$(ls -1d *.xcworkspace | head -n 1)
-          
-          # Automatically detect the correct scheme from the workspace
-          SCHEME=$(xcodebuild -workspace "$WORKSPACE" -list | awk '/Schemes:/{getline; print $1}')
-          
-          # Build using the detected workspace and scheme
-          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" -configuration Release -sdk iphoneos CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" SYMROOT=$(PWD)/build build
-          
-          cd build/Release-iphoneos
-          mkdir Payload
-          mv *.app Payload/
-          zip -r app.ipa Payload
+          set -euo pipefail
 
+          cd ios
+
+          WORKSPACE="$(find . -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$WORKSPACE" || {
+            echo "No Xcode workspace found"
+            exit 1
+          }
+
+          SCHEME="$(xcodebuild -workspace "$WORKSPACE" -list |
+            awk '/Schemes:/{getline; gsub(/^[[:space:]]+|[[:space:]]+$/, ""); print; exit}')"
+
+          test -n "$SCHEME" || {
+            echo "No Xcode scheme found"
+            exit 1
+          }
+
+          BUILD_DIR="$PWD/build/Release-iphoneos"
+          rm -rf "$PWD/build"
+          mkdir -p "$BUILD_DIR"
+
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath "$PWD/build/DerivedData" \
+            CONFIGURATION_BUILD_DIR="$BUILD_DIR" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY=""
+
+          APP_PATH="$(find "$BUILD_DIR" -maxdepth 1 -type d -name '*.app' -print -quit)"
+
+          test -n "$APP_PATH" || {
+            echo "No .app bundle found in $BUILD_DIR"
+            find "$PWD/build" -maxdepth 5 -type d -name '*.app' -print
+            exit 1
+          }
+
+          rm -rf "$BUILD_DIR/Payload"
+          mkdir -p "$BUILD_DIR/Payload"
+          cp -R "$APP_PATH" "$BUILD_DIR/Payload/"
+
+          cd "$BUILD_DIR"
+          zip -qry app.ipa Payload
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
